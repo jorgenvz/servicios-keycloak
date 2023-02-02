@@ -1,0 +1,5 @@
+sudo bin/kc.sh export --dir <dir_path> --users realm_file --realm <realm_name>
+
+sudo bin/kc.sh import --dir <dir_path>
+
+

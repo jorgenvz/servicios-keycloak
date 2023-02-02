@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Keycloak Example Application</title>
+    <script type="text/javascript" src="KC_URL/js/keycloak.js"></script>
+    <script type="text/javascript">
+
+        function output(content) {
+            if (typeof content === 'object') {
+                content = JSON.stringify(content, null, 2)
+            }
+            document.getElementById('output').textContent = content;
+        }
+
+        function profile() {
+            if (kc.idTokenParsed.name) {
+                document.getElementById('name').textContent = 'Hola ' + kc.idTokenParsed.name;
+            } else {
+                document.getElementById('name').textContent = 'Hola ' + kc.idTokenParsed.preferred_username;
+            }
+            if (kc.idTokenParsed.picture) {
+                document.getElementById('picture').src = kc.idTokenParsed.picture;
+            }
+            document.getElementById('user').style.display = 'block';
+        }
+
+        function sendRequest(url) {
+            var req = function() {
+                var req = new XMLHttpRequest();
+                req.onreadystatechange = function() {
+                    if (req.readyState === 4) {
+                        output(req.status + '\n\n' + req.responseText);
+                    }
+                }
+                req.open('GET', 'SERVICE_URL' + url, true);
+                req.setRequestHeader('Authorization', 'Bearer ' + kc.token);
+                req.send();
+            }
+
+            if (kc.authenticated) {
+                kc.updateToken(-1).success(req);
+            }
+        }
+
+        function sendRequestRPT() {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState === 4) {
+                    var RPTtokenparsed = JSON.parse(req.responseText);
+                    var RPTaccess_token = RPTtokenparsed.access_token;
+
+                    RPTtoken = parseJWT(RPTaccess_token);
+
+                    output(RPTtoken); 
+                }
+            }
+            req.open('POST', 'KC_URL' + '/realms/myrealm/protocol/openid-connect/token', true);
+            req.setRequestHeader('Authorization', 'Bearer ' + kc.token);
+            req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            req.send('grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&audience=mybackend');
+        }
+
+        function sendRequestRPTresource(resource) {
+            var req = new XMLHttpRequest();
+            req.onreadystatechange = function() {
+                if (req.readyState === 4) {
+                    var RPTtokenparsed = JSON.parse(req.responseText);
+                    var RPTaccess_token = RPTtokenparsed.access_token;
+
+                    RPTtoken = parseJWT(RPTaccess_token);
+
+                    output(RPTtoken); 
+                }else{
+                    output(req.status + '\n\n' + req.responseText);
+                }
+            }
+            req.open('POST', 'KC_URL' + '/realms/myrealm/protocol/openid-connect/token', true);
+            req.setRequestHeader('Authorization', 'Bearer ' + kc.token);
+            req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+            req.send('grant_type=urn:ietf:params:oauth:grant-type:uma-ticket&audience=mybackend&permission=' + resource);
+        }
+
+    
+        var kc = new Keycloak("keycloak.json");
+
+        //var kc = new Keycloak({ realm: 'myrealm', clientId: 'mybrowserapp' });
+        window.onload = function() {
+            kc.init({'messageReceiveTimeout': 100000}).then(function() {
+                if(kc.authenticated) {
+                    profile();
+                } else {
+                    document.getElementById('anonymous').style.display = 'block';
+                }
+            });
+        }
+
+        function parseJWT (token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        };
+
+    </script>
+</head>
+<body>
+
+<div id="anonymous" style="display: none">
+    <button onclick="window.kc.login()">Login</button>
+    <a href="http://localhost:3000/public" target="_blank">
+        <button>Access public</button>
+    </a>
+</div>
+
+<div id="user" style="display: none">
+    <button onclick="window.kc.logout()">Logout</button>
+    <button onclick="output(kc.idTokenParsed)">Show ID Token</button>
+    <button onclick="output(kc.tokenParsed)">Show Access Token</button>
+
+    <button onclick="sendRequestRPT()">Show RPT Token</button>
+    <button onclick="sendRequestRPTresource('localizacion1')">Show RPT Token for localizacion1</button>
+    <button onclick="sendRequestRPTresource('localizacion2')">Show RPT Token for localizacion2</button>
+    <button onclick="sendRequestRPTresource('pruebarecurso')">Show RPT Token for pruebarecurso</button>
+
+    <button onclick="window.kc.updateToken(-1).then(function() { output(kc.idTokenParsed); profile() })">Refresh</button>
+    <button onclick="sendRequest('/protected')">Access protected</button> 
+    <button onclick="sendRequest('/secured')">Access protected myrole</button>
+    <button onclick="sendRequest('/localizacion1')">View localizacion1</button>
+    <button onclick="sendRequest('/localizacion1/update')">Update localizacion1</button>
+    <button onclick="sendRequest('/localizacion2')">View localizacion2</button>
+    <button onclick="sendRequest('/localizacion2/update')">Update localizacion2</button>
+    <button onclick="sendRequest('/pruebarecurso')">View pruebarecurso</button>
+    <button onclick="sendRequest('/pruebarecurso/update')">Update pruebarecurso</button>
+    
+    <!--button onclick="sendRequest('menu')">Access resource menu</button-->
+    <a href="http://localhost:8180/realms/myrealm/account/" target="_blank">
+        <button>Access Keycloak user account</button>
+    </a>
+
+    <hr/>
+    <h2 id="name"></h2>
+    <!--img id="picture" width="50px" height="50px"/-->
+    <hr/>
+    <pre id="output"></pre>
+</div>
+
+
+
+</body>
+</html>
