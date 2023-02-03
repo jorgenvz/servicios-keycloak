@@ -1,8 +1,8 @@
 {
     "realm": "myrealm",
     "auth-server-url": "http://localhost:8180/",
-    "ssl-required": "external",
-    "resource": "app-offline",
+    "ssl-required": "none",
+    "resource": "mybrowserapp",
     "public-client": true,
     "confidential-port": 0
-}   
+  }
