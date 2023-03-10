@@ -112,7 +112,7 @@ function sendRequestRPT() {
 }
 ```
 
-Cambiar mybackend por el nombre del cliente configurado en Keycloak que actúa como servidor de recursos.
+Cambiar `mybackend` por el nombre del cliente configurado en Keycloak que actúa como servidor de recursos.
 
 #### Función sendRequestRPTresource
 
@@ -139,7 +139,7 @@ function sendRequestRPTresource(resource) {
 }
 ```
 
-Cambiar mybackend por el nombre del cliente configurado en Keycloak que actúa como servidor de recursos.
+Cambiar `mybackend` por el nombre del cliente configurado en Keycloak que actúa como servidor de recursos.
 
 #### Configuración de los botones
 
