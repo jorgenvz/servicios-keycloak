@@ -4,7 +4,7 @@
 
 # Contenidos
 
-- [Instalación](#instalación)
+- [Instalación y despliegue](#instalación-y-despliegue)
 - [Añadir secreto para la sesión](#añadir-secreto-para-la-sesión)
 - [Configurar la conexión con el servidor de Keycloak](#configurar-la-conexión-con-el-servidor-de-Keycloak)
   - [Backend](#backend)
@@ -15,7 +15,7 @@
 
 ---
 
-## Instalación
+## Instalación y despliegue
 
 En un terminal en el directorio `/backend`
 
@@ -23,10 +23,18 @@ En un terminal en el directorio `/backend`
 npm install
 ```
 
+```sh
+npm start
+```
+
 En un terminal en el directorio `/frontend`
 
 ```sh
 npm install
+```
+
+```sh
+npm start
 ```
 
 ## Añadir secreto para la sesión
